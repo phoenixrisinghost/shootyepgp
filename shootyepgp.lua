@@ -1944,7 +1944,7 @@ function sepgp:tradeLoot(playerState,targetState)
           return
         end
         local bind = self:itemBinding(itemString)
-        if (not bind) or (bind ~= self.VARS.boe) then return end
+        if (not bind) then return end
         if UnitExists("target") and UnitIsPlayer("target") and UnitCanCooperate("player","target") and (not UnitIsUnit("player","target")) then
           local tradeTarget = UnitName("target")
           local _, class = self:verifyGuildMember(tradeTarget,true)
@@ -1957,10 +1957,22 @@ function sepgp:tradeLoot(playerState,targetState)
             data[self.loot_index.player] = tradeTarget
             data[self.loot_index.player_c] = target_color
             data[self.loot_index.update] = 1
-            local dialog = StaticPopup_Show("SHOOTY_EPGP_AUTO_GEARPOINTS",data[self.loot_index.player_c],data[self.loot_index.item],data)
-            if (dialog) then
-              dialog.data = data
-            end
+          else
+            -- chest loot: no prior record exists, build fresh data
+            local off_price = math.floor(price * sepgp_discount)
+            data = {
+              [self.loot_index.time]      = timestamp,
+              [self.loot_index.player]    = tradeTarget,
+              [self.loot_index.player_c]  = target_color,
+              [self.loot_index.item]      = itemLink,
+              [self.loot_index.bind]      = bind,
+              [self.loot_index.price]     = price,
+              [self.loot_index.off_price] = off_price,
+            }
+          end
+          local dialog = StaticPopup_Show("SHOOTY_EPGP_AUTO_GEARPOINTS",data[self.loot_index.player_c],data[self.loot_index.item],data)
+          if (dialog) then
+            dialog.data = data
           end
         end
       end
